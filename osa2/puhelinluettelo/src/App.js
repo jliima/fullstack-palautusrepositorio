@@ -1,71 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
-
-
-const Filter = ({filter, setFilter, handleFilterChange}) => {
-  return (
-    <form onSubmit={setFilter}>
-      <div>filter shown with
-        <input
-          value={filter}
-          onChange={handleFilterChange}
-        />
-      </div>
-    </form>
-  )
-}
-
-
-const PersonForm = ({newName, newNumber, addPerson, 
-                    handleSetNameChange, handleSetNumberChange}) => (
-  <form onSubmit={addPerson}>
-    <div>name:
-      <input
-        value={newName}
-        onChange={handleSetNameChange}
-      />
-    </div>
-
-    <div>number:
-      <input
-        value={newNumber}
-        onChange={handleSetNumberChange}
-      />
-    </div>
-
-    <div>
-      <button type='submit'>add</button>
-    </div>
-
-  </form>
-)
-
-
-const Persons = ({persons, filter}) => {
-  const renderPersons = (persons) => (
-    <>
-      {persons.map((person, i) => 
-        <div key={i}>
-          {person.name} {person.number}
-        </div>
-      )}
-    </>
-  )
-  
-  if (filter === '') {
-    return renderPersons(persons)
-  }
-
-  const filteredPersons = []
-
-  persons.forEach((person) => {
-    if (person.name.toLowerCase().includes(filter.toLowerCase())) {
-      filteredPersons.push(person)
-    }
-  })
-
-  return renderPersons(filteredPersons)
-}
+import Filter from './components/Filter'
+import PersonForm from './components/PersonForm'
+import Persons from './components/Persons'
+import phonebook from './services/phonebook'
 
 
 const App = () => {
@@ -75,36 +12,56 @@ const App = () => {
   const [ newNumber, setNewNumber ] = useState('')
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data)
-      })
+    phonebook
+      .getAll()
+        .then(initialPersons => {
+          setPersons(initialPersons)
+        })
   }, [])
-
-  const personExists = () => {
-    const pos = persons.map(person => person.name).indexOf(newName)
-    if (pos === -1){
-      return false
-    } else {
-      return true
-    }
-  }
 
   const addPerson = (event) => {
     event.preventDefault()
-    const personObject = {
+    const newPerson = {
       name: newName,
       number: newNumber
     }
-    if (!personExists()) {
-      setPersons(persons.concat(personObject))
-      setNewName('')
-      setNewNumber('')
-    } else {
-      window.alert(`${newName} is already added to phonebook`)
+
+    const arrayid = persons.map(person => person.name).indexOf(newName)
+
+    if (arrayid === -1) {
+      phonebook
+        .create(newPerson)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson))
+          setNewName('')
+          setNewNumber('')
+        })
+
+    } else if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+      const id = persons[arrayid].id
+      phonebook
+        .update(id, newPerson)
+        .then(returnedPerson => {
+          setPersons(persons.map(person => person.id !== id ? person : returnedPerson))
+          setNewName('')
+          setNewNumber('')
+        })
     }
 
+  }
+  
+  const deletePerson = (id) => {
+    if (window.confirm(`Delete ${persons.filter(n => n.id === id)[0].name}?`)) {
+      phonebook
+        .deletePerson(id)
+        .then(response => {
+          setPersons(persons.filter(n => n.id !== id))
+        })
+        .catch(error => {
+          alert(`The person '${persons[id].name}' was already deleted from server.`)
+          setPersons(persons.filter(n => n.id !== id))
+        })
+    }
   }
 
   const handleSetNameChange = (event) => {
@@ -131,11 +88,10 @@ const App = () => {
                   handleSetNumberChange={handleSetNumberChange} />
 
       <h3>Numbers</h3>
-      <Persons persons={persons} filter={filter} />
+      <Persons persons={persons} filter={filter} deletePerson={deletePerson} />
 
     </div>
   )
 }
-
 
 export default App
