@@ -3,6 +3,7 @@ import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import phonebook from './services/phonebook'
+import Notification from './components/Notification'
 
 
 const App = () => {
@@ -10,6 +11,8 @@ const App = () => {
   const [ filter, setFilter ] = useState('')
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
+  const [notificationMessage, setNotificationMessage] = useState(null)
+  const [notificationColor, setNotificationColor] = useState(null)
 
   useEffect(() => {
     phonebook
@@ -18,6 +21,14 @@ const App = () => {
           setPersons(initialPersons)
         })
   }, [])
+
+  const notification = (color, message) => {
+    setNotificationColor(color)
+    setNotificationMessage(message)
+    setTimeout(() => {
+      setNotificationMessage(null)
+    }, 3000)
+  }
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -35,6 +46,7 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
+          notification('green', `Addded ${newName}`)
         })
 
     } else if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
@@ -45,20 +57,23 @@ const App = () => {
           setPersons(persons.map(person => person.id !== id ? person : returnedPerson))
           setNewName('')
           setNewNumber('')
+          notification('green', `The phonenumber of ${newName} has been changed`)
         })
     }
 
   }
   
   const deletePerson = (id) => {
-    if (window.confirm(`Delete ${persons.filter(n => n.id === id)[0].name}?`)) {
+    const personName = persons.filter(n => n.id === id)[0].name
+    if (window.confirm(`Delete ${personName}?`)) {
       phonebook
         .deletePerson(id)
         .then(response => {
+          notification('red', `Deleted ${personName}`)
           setPersons(persons.filter(n => n.id !== id))
         })
         .catch(error => {
-          alert(`The person '${persons[id].name}' was already deleted from server.`)
+          notification('red', `The person '${personName}' was already deleted from server.`)
           setPersons(persons.filter(n => n.id !== id))
         })
     }
@@ -79,6 +94,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notificationMessage} color={notificationColor} />
       <Filter filter={filter} setFilter={setFilter} 
                                handleFilterChange={handleFilterChange} />
       
