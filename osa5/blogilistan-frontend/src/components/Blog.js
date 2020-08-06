@@ -10,7 +10,6 @@ const Blog = ({ user, blog, modifyBlog, removeBlog }) => {
     borderWidth: 1,
     marginBottom: 5
   }
-  const visibility = { display: viewBlog ? '' : 'none' }
 
   const viewButton = () => {
     const buttonText = viewBlog
@@ -27,6 +26,21 @@ const Blog = ({ user, blog, modifyBlog, removeBlog }) => {
     } else {
       return null
     }
+  }
+
+  const moreInfo = () => {
+    if (viewBlog) {
+      return (
+        <div>
+          <div>{blog.url}</div>
+          <div>likes {blog.likes} <button onClick={handleLikeButtonClicked}>like</button></div>
+          <div>{blog.user.name}</div>
+
+          {removeButton()}
+
+        </div>
+      )
+    } else return null
   }
 
   const handleLikeButtonClicked = () => {
@@ -46,14 +60,7 @@ const Blog = ({ user, blog, modifyBlog, removeBlog }) => {
         {blog.title} {blog.author} {viewButton()}
       </div>
 
-      <div style={visibility}>
-        <div>{blog.url}</div>
-        <div>likes {blog.likes} <button onClick={handleLikeButtonClicked}>like</button></div>
-        <div>{blog.user.name}</div>
-
-        {removeButton()}
-
-      </div>
+      {moreInfo()}
     </div>
   )
 }
