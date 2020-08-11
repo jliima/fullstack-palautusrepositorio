@@ -132,15 +132,17 @@ const App = () => {
         <h2>create new</h2>
         {blogForm()}
 
-        {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
-          <Blog
-            key={blog.id}
-            user={user}
-            blog={blog}
-            modifyBlog={modifyBlog}
-            removeBlog={removeBlog}
-          />
-        )}
+        <div id='blogs'>
+          {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
+            <Blog
+              key={blog.id}
+              user={user}
+              blog={blog}
+              modifyBlog={modifyBlog}
+              removeBlog={removeBlog}
+            />
+          )}
+        </div>
 
       </div>
       }

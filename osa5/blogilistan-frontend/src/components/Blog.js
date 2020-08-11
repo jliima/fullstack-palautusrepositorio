@@ -33,7 +33,11 @@ const Blog = ({ user, blog, modifyBlog, removeBlog }) => {
       return (
         <div>
           <div>{blog.url}</div>
-          <div>likes {blog.likes} <button onClick={handleLikeButtonClicked}>like</button></div>
+
+          <div>
+            likes <span id='likes'>{blog.likes}</span> <button onClick={handleLikeButtonClicked}>like</button>
+          </div>
+
           <div>{blog.user.name}</div>
 
           {removeButton()}
@@ -55,7 +59,7 @@ const Blog = ({ user, blog, modifyBlog, removeBlog }) => {
   }
 
   return (
-    <div style={blogStyle}>
+    <div id='blog' style={blogStyle}>
       <div>
         {blog.title} {blog.author} {viewButton()}
       </div>
