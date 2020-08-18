@@ -8,6 +8,11 @@ const AnecdoteForm = (props) => {
   const addNew = (event) => {
     event.preventDefault()
     const anecdote = event.target.anecdote.value
+
+    if(anecdote === '') {
+      return
+    }
+    
     event.target.anecdote.value = ''
     dispatch(newAnecdote(anecdote))
   }
